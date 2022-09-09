@@ -14,7 +14,6 @@ const db = mysql.createConnection(
     },
     console.log('Connected to the employee_db database.')
 );
-
 db.connect(err => {
     if (err) throw err;
     console.log("Connected as Id" + db.threadId);
@@ -38,10 +37,14 @@ function promptUser() {
         choices: ['View All Employees',
                   'View All Departments',
                   'View All Roles', 
-                  'Update Employee Role', 
+                  'Update Employee Role',
+                  'Update Employee Manager', 
                   'Add Employee',
                   'Add Role',
-                  'Add Department', 
+                  'Add Department',
+                  'Delete Department',
+                  'Delete Role',
+                  'Delete Employee', 
                   'Quit'],
         name: 'userOperation',
     }
@@ -61,6 +64,9 @@ function promptUser() {
             case 'Update Employee Role':
                 updateEmployee();
                 break;
+            case 'Update Employee Manager':
+                updateManager();
+                break;   
             case 'Add Employee':
                 addEmployee();
                 break;
@@ -70,6 +76,15 @@ function promptUser() {
             case 'Add Department':
                 addDepartment();
                 break;  
+            case 'Delete Department':
+                deleteDepartment();
+                break; 
+            case 'Delete Role':
+                deleteRole();
+                break; 
+            case 'Delete Employee':
+                deleteEmployee();
+                break;
             case 'Quit':
                 db.end();
                 break;     
@@ -290,10 +305,148 @@ function updateEmployee () {
         .then(answers => {
             db.query(`UPDATE employees SET role_id = ${answers.newRole} WHERE id = ${answers.employeeUpdate}`, function (err, results) {
                 if (err) throw err;
-                console.table(`${answers.employeeUpdate}`);
+                console.table('Employee has been updated.');
                 promptUser();
             });
         })
     });
   });
 }
+// Updates an employe's manager
+function updateManager() {
+    db.query("SELECT * FROM employees", function (err, results) {
+        if (err) throw err;
+        const employeeArray = [];
+        for (let i = 0; i < results.length; i++) {
+            employeeArray.push({
+                name: results[i].first_name + ' ' + results[i].last_name,
+                value: results[i].id
+            }); 
+        }
+        
+        db.query("SELECT * FROM employees WHERE manager_id IS NULL", function (err, results) {
+            if (err) throw err;
+            const managerArray = [{
+                name: 'None',
+                value: 'NULL'
+            }];
+    
+            for (let i = 0; i < results.length; i++) {
+                managerArray.push({
+                    name: results[i].first_name + ' ' + results[i].last_name,
+                    value: results[i].id
+                });    
+            }
+        
+    
+        let questions = [
+            {
+                type: 'list',
+                message: "Which employee do you want to update?",
+                choices: employeeArray,
+                name: 'employeeUpdate'
+            
+            },
+            {
+                type: 'list',
+                message: 'Which manager do you want to assign to the selected employee?', 
+                choices: managerArray,
+                name: 'newManager' 
+            }
+        ]
+    
+        inquirer.prompt(questions)
+        .then(answers => {
+            db.query(`UPDATE employees SET manager_id = ${answers.newManager} WHERE id = ${answers.employeeUpdate}`, function (err, results) {
+                if (err) throw err;
+                console.table(`Employee has been updated.`);
+                promptUser();
+            });
+        })
+    });
+  });
+}
+// Deletes selected department
+function deleteDepartment() { 
+    db.query("SELECT * FROM departments", function (err, results) {
+        if (err) throw err;
+        const deptArray = [];
+        for (let i = 0; i < results.length; i++) {
+            deptArray.push({
+                name: results[i].name,
+                value: results[i].id
+            }); 
+        }
+    
+        inquirer.prompt ({
+            type: 'list',
+            message: 'What department do you want to delete?', 
+            choices: deptArray,
+            name: 'departmentDeleted'
+        })
+        .then(answers => {
+            db.query(`DELETE FROM departments WHERE id = ${answers.departmentDeleted}`, function (err, results) {
+                if (err) throw err;
+                console.log('Department deleted.');
+                promptUser();
+            });
+
+        })
+    })
+} 
+// Deletes selected role
+function deleteRole() {  
+    db.query("SELECT * FROM roles", function (err, results) {
+        if (err) throw err;
+        const roleArray = [];
+        for (let i = 0; i < results.length; i++) {
+            roleArray.push({
+                name: results[i].title,
+                value: results[i].id
+            }); 
+        }
+    
+        inquirer.prompt ({
+            type: 'list',
+            message: 'Which role do you want to delete?', 
+            choices: roleArray,
+            name: 'roleDeleted'
+        })
+        .then(answers => {
+            db.query(`DELETE FROM roles WHERE id = ${answers.roleDeleted}`, function (err, results) {
+                if (err) throw err;
+                console.log('Role deleted.');
+                promptUser();
+            });
+
+        })
+    })
+} 
+// Deletes selected employee
+function deleteEmployee() {  
+    db.query("SELECT * FROM employees", function (err, results) {
+        if (err) throw err;
+        const employeeArray = [];
+        for (let i = 0; i < results.length; i++) {
+            employeeArray.push({
+                name: results[i].first_name + ' ' + results[i].last_name,
+                value: results[i].id
+            }); 
+        }
+    
+        inquirer.prompt ({
+            type: 'list',
+            message: 'Which employee do you want to delete?', 
+            choices: employeeArray,
+            name: 'employeeDeleted'
+        })
+        .then(answers => {
+            db.query(`DELETE FROM employees WHERE id = ${answers.employeeDeleted}`, function (err, results) {
+                if (err) throw err;
+                console.log('Employee deleted.');
+                promptUser();
+            });
+
+        })
+    })
+} 
