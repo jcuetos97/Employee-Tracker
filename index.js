@@ -21,6 +21,7 @@ db.connect(err => {
     appWelcome();
 });
 
+// Welcoming to Employee Tracker App
 function appWelcome() {
 console.log("***********************************")
 console.log("*                                 *")
@@ -29,7 +30,7 @@ console.log("*                                 *")
 console.log("***********************************")
 promptUser();
 };
-
+// Asks the user with what operation wants to proceed
 function promptUser() {
      const choices = {
         type: 'list',
@@ -78,7 +79,7 @@ function promptUser() {
         console.error(err);
       });
 }
-
+// Shows all the employees in the database
 function viewAllEmployees() {
     const sqlQuery = `
     SELECT employees.id, 
@@ -99,7 +100,7 @@ function viewAllEmployees() {
             promptUser();
     });
 }
-
+// Shows all the roles in the database
 function viewAllRoles() {
     const sqlQuery = `
     SELECT roles.id, 
@@ -115,7 +116,7 @@ function viewAllRoles() {
             promptUser();
     });
 }
-
+// Shows all the departments in the database
 function viewAllDepartments() {
     db.query(`SELECT * FROM departments`, function (err, results) {
         if (err) throw err;
@@ -123,115 +124,115 @@ function viewAllDepartments() {
             promptUser();
     });
 }
-
+// Adds a new employee to the database
 function addEmployee() {
-    const managerArray = [{
-        name: 'None',
-        value: 'NULL'
-    }];
+    
     db.query("SELECT * FROM employees WHERE manager_id IS NULL", function (err, results) {
         if (err) throw err;
+        const managerArray = [{
+            name: 'None',
+            value: 'NULL'
+        }];
+
         for (var i = 0; i < results.length; i++) {
             managerArray.push({
                 name: results[i].first_name + ' ' + results[i].last_name,
                 value: results[i].id
             });    
         }
-    });
     
-    const roleArray = [];
-    db.query("SELECT * FROM roles", function (err, results) {
+        db.query("SELECT * FROM roles", function (err, results) {
+                if (err) throw err;
+                const roleArray = [];
+                for (var i = 0; i < results.length; i++) {
+                    roleArray.push({
+                        name: results[i].title,
+                        value: results[i].id
+                    });    
+                }
+   
+        let questions = [
+            {
+                type: 'input',
+                message: "What is the employee's first name?", 
+                name: 'firstName', 
+            },
+            {
+                type: 'input',
+                message: "What is the employee's last name?", 
+                name: 'lastName',
+            }, 
+            {
+                type: 'list',
+                message: "What is the employee's role?", 
+                choices: roleArray,
+                name: 'employeeRole'
+            },
+            {
+                type: 'list',
+                message: "Who is the employee's manager?",
+                choices: managerArray,
+                name: 'employeeManager'
+            }
+        ] 
+    
+        inquirer.prompt(questions)
+        .then(answers => {
+            const sqlQuery = `
+            INSERT INTO employees (first_name, last_name, role_id, manager_id) 
+            VALUES 
+            ('${answers.firstName}', '${answers.lastName}', ${answers.employeeRole}, ${answers.employeeManager})`;
+    
+            db.query(sqlQuery, function (err, results) {
+                if (err) throw err;
+                console.log('New employee added.');
+                promptUser();
+            });
+        }) 
+    });
+});
+}
+// Adds a new role to the database
+function addRole () {
+    db.query("SELECT * FROM departments", function (err, results) {
         if (err) throw err;
-        
+        const departmentArray = [];
         for (var i = 0; i < results.length; i++) {
-            roleArray.push({
-                name: results[i].title,
+            let dept = {
+                name: results[i].name,
                 value: results[i].id
-            });    
+            }
+            departmentArray.push(dept);
         }
-    });
-    
-    let questions = [
-        {
+
+        let questions = [{
             type: 'input',
-            message: "What is the employee's first name?", 
-            name: 'firstName', 
-        },
-        {
-            type: 'input',
-            message: "What is the employee's last name?", 
-            name: 'lastName',
+            message: 'What is the name of the role?', 
+            name: 'roleName'
         }, 
         {
-            type: 'list',
-            message: "What is the employee's role?", 
-            choices: roleArray,
-            name: 'employeeRole'
+            type: 'input',
+            message: 'What is the salary of the role?',
+            name: 'roleSalary'
         },
         {
-            type: 'list',
-            message: "Who is the employee's manager?",
-            choices: managerArray,
-            name: 'employeeManager'
-        }
-    ] 
-    
-    inquirer.prompt(questions)
-    .then(answers => {
-        const sqlQuery = `
-        INSERT INTO employees (first_name, last_name, role_id, manager_id) 
-        VALUES 
-        ('${answers.firstName}', '${answers.lastName}', ${answers.employeeRole}, ${answers.employeeManager})`;
-  
-        db.query(sqlQuery, function (err, results) {
-            if (err) throw err;
-            console.log('New employee added.');
-            promptUser();
-        });
-    }) 
-}
+            type: 'list', 
+            message: 'Which department does the role belong to?',
+            choices: departmentArray,
+            name: 'roleDepartment'
+        }]
 
-function addRole () {
-    
-    const departmentArray = [];
-    db.query("SELECT * FROM departments", function (err, results) {
-    if (err) throw err;
-    for (var i = 0; i < results.length; i++) {
-        let dept = {
-            name: results[i].name,
-            value: results[i].id
-        }
-        departmentArray.push(dept);
-    }
+        inquirer.prompt(questions)
+        .then(answers => {
+            db.query(`INSERT INTO roles (title, salary, department_id) VALUES ('${answers.roleName}', ${answers.roleSalary}, ${answers.roleDepartment})`, function (err, results) {
+                if (err) throw err;
+                console.log('New role added.');
+                promptUser();
+            });
+        }) 
     });
-
-    inquirer.prompt ([{
-        type: 'input',
-        message: 'What is the name of the role?', 
-        name: 'roleName'
-    }, 
-    
-    {
-        type: 'input',
-        message: 'What is the salary of the role?',
-        name: 'roleSalary'
-    },
-
-    {
-        type: 'list', 
-        message: 'Which department does the role belong to?',
-        choices: departmentArray,
-        name: 'roleDepartment'
-    }])
-    .then(answers => {
-        db.query(`INSERT INTO roles (title, salary, department_id) VALUES ('${answers.roleName}', ${answers.roleSalary}, ${answers.roleDepartment})`, function (err, results) {
-            if (err) throw err;
-            console.log('New role added.');
-            promptUser();
-        });
-    }) 
 }
-
+// Adds a new department to the database
 function addDepartment () {  
     inquirer.prompt ({
         type: 'input',
@@ -247,7 +248,7 @@ function addDepartment () {
 
     })
 }
-
+// Updates information about an specific employee
 function updateEmployee () {
     db.query("SELECT * FROM employees", function (err, results) {
         if (err) throw err;
