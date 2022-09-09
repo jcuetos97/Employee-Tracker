@@ -4,7 +4,7 @@
 
   ## [Description](#table-of-contents)
 
-  When creating an open source project on GitHub, it’s important to have a high-quality README for the app. This command-line application allows users generate their own readme files based on their responses to specific prompted questions. This includes what the app is for, how to use the app, how to install it, how to report issues, and how to make contributions. It lets users save time while simultaneously making their projects more complete and professional!
+  This is a command-line application developed to manage a company's employee database, using Node.js, Inquirer, and MySQL. It allows the user to view, add and edit employees, roles, departments and managers.  
   
   ![Demo](./assets/images/SS%20Demo.png)
 

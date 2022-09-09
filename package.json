@@ -20,6 +20,7 @@
   "homepage": "https://github.com/jcuetos97/Employee-Tracker#readme",
   "dependencies": {
     "console.table": "^0.10.0",
+    "dotenv": "^16.0.2",
     "inquirer": "^6.3.1",
     "mysql2": "^2.3.3"
   }
