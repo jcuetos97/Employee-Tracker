@@ -29,7 +29,7 @@ console.log("*        EMPLOYEE TRACKER         *")
 console.log("*                                 *")
 console.log("***********************************")
 promptUser();
-};
+}
 // Asks the user with what operation wants to proceed
 function promptUser() {
      const choices = {
@@ -134,7 +134,7 @@ function addEmployee() {
             value: 'NULL'
         }];
 
-        for (var i = 0; i < results.length; i++) {
+        for (let i = 0; i < results.length; i++) {
             managerArray.push({
                 name: results[i].first_name + ' ' + results[i].last_name,
                 value: results[i].id
@@ -144,7 +144,7 @@ function addEmployee() {
         db.query("SELECT * FROM roles", function (err, results) {
                 if (err) throw err;
                 const roleArray = [];
-                for (var i = 0; i < results.length; i++) {
+                for (let i = 0; i < results.length; i++) {
                     roleArray.push({
                         name: results[i].title,
                         value: results[i].id
@@ -197,7 +197,7 @@ function addRole () {
     db.query("SELECT * FROM departments", function (err, results) {
         if (err) throw err;
         const departmentArray = [];
-        for (var i = 0; i < results.length; i++) {
+        for (let i = 0; i < results.length; i++) {
             let dept = {
                 name: results[i].name,
                 value: results[i].id
@@ -253,7 +253,7 @@ function updateEmployee () {
     db.query("SELECT * FROM employees", function (err, results) {
         if (err) throw err;
         const employeeArray = [];
-        for (var i = 0; i < results.length; i++) {
+        for (let i = 0; i < results.length; i++) {
             employeeArray.push({
                 name: results[i].first_name + ' ' + results[i].last_name,
                 value: results[i].id
@@ -263,7 +263,7 @@ function updateEmployee () {
         db.query("SELECT * FROM roles", function (err, results) {
             if (err) throw err;
             const roleArray = [];
-            for (var i = 0; i < results.length; i++) {
+            for (let i = 0; i < results.length; i++) {
                 roleArray.push({
                     name: results[i].title,
                     value: results[i].id
